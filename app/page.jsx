@@ -19,7 +19,25 @@ export default async function Home() {
       skills: {
         languages: ["Python", "JavaScript", "C++"],
         webDevelopment: ["Next.js", "Tailwind CSS", "Node.js"]
-      }
+      },
+      experience: [
+        {
+          role: "Web Development Team Lead",
+          company: "Sanganak Coding Club, Dibrugarh",
+          period: "Oct 2023 - Present",
+          description: [
+            "Mentoring team members on full-stack workflows and version control.",
+            "Architecting dynamic components for club events and workshops."
+          ]
+        }
+      ],
+      projects: [
+        {
+          title: "Portfolio Admin Dashboard",
+          description: "A live MongoDB-backed admin panel built with Next.js App Router.",
+          tech: ["Next.js", "MongoDB", "Tailwind CSS"]
+        }
+      ]
     };
   }
 
@@ -102,7 +120,7 @@ export default async function Home() {
                     <p className="text-slate-400 text-sm mt-2">{proj.description}</p>
                   </div>
                   <div className="flex flex-wrap gap-1.5 mt-4">
-                    {proj.tech?.t && proj.tech.map((t, i) => (
+                    {proj.tech && proj.tech.map((t, i) => (
                       <span key={i} className="bg-indigo-950 text-indigo-300 px-2 py-0.5 rounded text-[10px]">
                         {t}
                       </span>
