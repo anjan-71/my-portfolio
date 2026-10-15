@@ -13,35 +13,13 @@ export default async function Home() {
     portfolioData = {
       about: {
         name: "Anjan Boro",
-        title: "Full-Stack Web Developer & CSE Graduate",
-        summary: "Passionate developer building dynamic, data-driven web applications."
-      },
-      skills: {
-        languages: ["Python", "JavaScript", "C++"],
-        webDevelopment: ["Next.js", "Tailwind CSS", "Node.js"]
-      },
-      experience: [
-        {
-          role: "Web Development Team Lead",
-          company: "Sanganak Coding Club, Dibrugarh",
-          period: "Oct 2023 - Present",
-          description: [
-            "Mentoring team members on full-stack workflows and version control.",
-            "Architecting dynamic components for club events and workshops."
-          ]
-        }
-      ],
-      projects: [
-        {
-          title: "Portfolio Admin Dashboard",
-          description: "A live MongoDB-backed admin panel built with Next.js App Router.",
-          tech: ["Next.js", "MongoDB", "Tailwind CSS"]
-        }
-      ]
+        title: "Web Developer | CSE Graduate & M.Tech Student",
+        summary: "Computer Science and Engineering graduate with practical experience in web development, responsive website design, and team mentoring."
+      }
     };
   }
 
-  const { about, skills, experience, projects } = portfolioData;
+  const { about, skills, education, experience, projects, publications, certifications } = portfolioData;
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 p-8 sm:p-16">
@@ -61,6 +39,24 @@ export default async function Home() {
             Admin Panel
           </Link>
         </header>
+
+        {/* Education Section */}
+        {education && education.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-white">Education</h2>
+            <div className="space-y-4">
+              {education.map((edu, idx) => (
+                <div key={idx} className="bg-slate-900 border border-slate-800 p-5 rounded-lg flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg font-medium text-white">{edu.degree}</h3>
+                    <p className="text-indigo-400 text-sm mt-1">{edu.institution}</p>
+                  </div>
+                  <span className="text-xs text-slate-400">{edu.period}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Skills Section */}
         {skills && (
@@ -128,6 +124,36 @@ export default async function Home() {
                   </div>
                 </div>
               ))}
+            </div>
+          </section>
+        )}
+
+        {/* Publications Section */}
+        {publications && publications.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-white">Publications</h2>
+            <div className="space-y-4">
+              {publications.map((pub, idx) => (
+                <div key={idx} className="bg-slate-900 border border-slate-800 p-5 rounded-lg">
+                  <h3 className="text-lg font-medium text-white">{pub.title}</h3>
+                  <p className="text-slate-400 text-sm mt-1">{pub.authors}</p>
+                  <p className="text-indigo-400 text-xs mt-2 italic">{pub.journal}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Certifications Section */}
+        {certifications && certifications.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-white">Certifications and Training</h2>
+            <div className="bg-slate-900 border border-slate-800 p-5 rounded-lg">
+              <ul className="list-disc list-inside space-y-2 text-slate-300 text-sm">
+                {certifications.map((cert, idx) => (
+                  <li key={idx}>{cert}</li>
+                ))}
+              </ul>
             </div>
           </section>
         )}
