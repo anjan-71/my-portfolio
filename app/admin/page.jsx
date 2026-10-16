@@ -5,12 +5,12 @@ import Link from 'next/link';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [jsonInputString, setJsonInputString] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Check initial authentication and fetch data
   useEffect(() => {
     async function initAdmin() {
       try {
@@ -41,29 +41,26 @@ export default function AdminPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: passwordInput }),
+        body: JSON.stringify({ username: usernameInput, password: passwordInput }),
       });
 
-      // Get response as text first to inspect it
       const textResponse = await res.text();
       let result;
 
       try {
         result = JSON.parse(textResponse);
       } catch (err) {
-        // If it's HTML, throw a clean error showing it's a 404/500 page
-        throw new Error(`API route error (received HTML instead of JSON). Check if app/api/auth/login/route.js exists. Response preview: ${textResponse.slice(0, 100)}`);
+        throw new Error(`API route error: ${textResponse.slice(0, 100)}`);
       }
 
       if (result.success) {
         setIsAuthenticated(true);
         window.location.reload();
       } else {
-        alert(result.error || 'Incorrect password!');
+        alert(result.error || 'Incorrect username or password!');
       }
     } catch (err) {
       alert('Login failed: ' + err.message);
-      console.error(err);
     }
   };
 
@@ -78,14 +75,7 @@ export default function AdminPage() {
         body: JSON.stringify(parsedData),
       });
 
-      const textResponse = await response.text();
-      let result;
-
-      try {
-        result = JSON.parse(textResponse);
-      } catch (e) {
-        throw new Error(`Server returned non-JSON response: "${textResponse || 'Empty body'}"`);
-      }
+      const result = await response.json();
 
       if (!response.ok || !result.success) {
         throw new Error(result.error || 'Failed to update portfolio data');
@@ -94,7 +84,6 @@ export default function AdminPage() {
       alert('Portfolio updated successfully!');
     } catch (err) {
       alert('Error saving changes: ' + err.message);
-      console.error(err);
     } finally {
       setSaving(false);
     }
@@ -108,22 +97,39 @@ export default function AdminPage() {
     );
   }
 
-  // Show Login Form if not authenticated
+  // Show Login Form with Username and Password fields
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
         <form onSubmit={handleLogin} className="bg-slate-900 border border-slate-800 p-8 rounded-xl max-w-md w-full space-y-4 shadow-2xl">
           <h1 className="text-2xl font-bold mb-2">Admin Login</h1>
-          <p className="text-slate-400 text-sm">Enter your password to access the portfolio editor.</p>
-          <input
-            type="password"
-            value={passwordInput}
-            onChange={(e) => setPasswordInput(e.target.value)}
-            placeholder="Admin Password"
-            className="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-white focus:outline-none focus:border-indigo-500"
-            required
-          />
-          <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-lg font-medium transition shadow-lg">
+          <p className="text-slate-400 text-sm">Enter your credentials to access the portfolio editor.</p>
+          
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Username</label>
+            <input
+              type="text"
+              value={usernameInput}
+              onChange={(e) => setUsernameInput(e.target.value)}
+              placeholder="Admin Username"
+              className="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Password</label>
+            <input
+              type="password"
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              placeholder="Admin Password"
+              className="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              required
+            />
+          </div>
+
+          <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-lg font-medium transition shadow-lg mt-2">
             Login
           </button>
         </form>
