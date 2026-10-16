@@ -148,7 +148,15 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
         <form onSubmit={handleLogin} className="bg-slate-900 border border-slate-800 p-8 rounded-xl max-w-md w-full space-y-4 shadow-2xl">
-          <h1 className="text-2xl font-bold mb-2">Admin Login</h1>
+          <div className="flex justify-between items-center mb-1">
+            <h1 className="text-2xl font-bold">Admin Login</h1>
+            <Link 
+              href="/" 
+              className="text-xs text-slate-400 hover:text-white transition bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg border border-slate-700"
+            >
+              ← Home
+            </Link>
+          </div>
           <p className="text-slate-400 text-sm">Enter your credentials to access the portfolio editor.</p>
           
           <div>

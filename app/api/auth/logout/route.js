@@ -5,12 +5,11 @@ export async function POST() {
   try {
     const cookieStore = await cookies();
     
-    // Clear/expire the session cookie
     cookieStore.set('admin_session', '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      expires: new Date(0), // Expire immediately
+      expires: new Date(0),
       path: '/',
     });
 
