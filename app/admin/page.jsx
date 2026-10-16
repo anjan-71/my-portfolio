@@ -10,6 +10,7 @@ export default function AdminPage() {
   const [jsonInputString, setJsonInputString] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
 
   useEffect(() => {
     async function initAdmin() {
@@ -64,6 +65,22 @@ export default function AdminPage() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/auth/logout', { method: 'POST' });
+      const result = await res.json();
+      
+      if (result.success) {
+        setIsAuthenticated(false);
+        window.location.reload();
+      } else {
+        alert('Logout failed');
+      }
+    } catch (err) {
+      alert('Logout error: ' + err.message);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -86,6 +103,35 @@ export default function AdminPage() {
       alert('Error saving changes: ' + err.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePdfUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingPdf(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/portfolio/upload-pdf', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || 'Failed to process PDF file');
+      }
+
+      alert('PDF uploaded and extracted successfully!');
+      window.location.reload();
+    } catch (err) {
+      alert('PDF upload failed: ' + err.message);
+    } finally {
+      setUploadingPdf(false);
     }
   };
 
@@ -142,13 +188,39 @@ export default function AdminPage() {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
           <h1 className="text-2xl md:text-3xl font-bold">Portfolio Admin Dashboard</h1>
-          <Link 
-            href="/" 
-            target="_blank" 
-            className="text-sm bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition"
-          >
-            View Live Portfolio ↗
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link 
+              href="/" 
+              target="_blank" 
+              className="text-sm bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition"
+            >
+              View Live Portfolio ↗
+            </Link>
+            <button 
+              onClick={handleLogout}
+              className="text-sm bg-red-600 hover:bg-red-500 text-white font-medium px-4 py-2 rounded-lg transition shadow-lg"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+
+        {/* PDF Upload Section */}
+        <div className="bg-gray-900 border border-gray-800 p-6 rounded-2xl mb-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div>
+            <h2 className="text-lg font-semibold text-white">Update from PDF (Resume)</h2>
+            <p className="text-sm text-gray-400">Upload a PDF file to automatically extract and update your portfolio data.</p>
+          </div>
+          <label className={`cursor-pointer bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition shadow-lg ${uploadingPdf ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            {uploadingPdf ? 'Processing PDF...' : 'Upload PDF 📄'}
+            <input 
+              type="file" 
+              accept="application/pdf" 
+              onChange={handlePdfUpload} 
+              disabled={uploadingPdf} 
+              className="hidden" 
+            />
+          </label>
         </div>
 
         <p className="text-gray-400 mb-4 text-sm">
