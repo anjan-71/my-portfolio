@@ -32,6 +32,8 @@ export async function POST(request) {
       {
         about: body.about,
         skills: body.skills || [],
+        resumeUrl: body.resumeUrl,
+        socialLinks: body.socialLinks,
         education: body.education,
         experience: body.experience || [],
         projects: body.projects || [],

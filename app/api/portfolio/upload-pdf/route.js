@@ -1,20 +1,8 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import mongoose from 'mongoose';
-
-async function connectDB() {
-  if (mongoose.connections[0].readyState) return;
-  if (!process.env.MONGO_URI) {
-    throw new Error('MONGO_URI environment variable is not defined.');
-  }
-  await mongoose.connect(process.env.MONGO_URI);
-}
-
-// Explicitly define/retrieve the Portfolio model safely
-const Portfolio = mongoose.models.Portfolio || mongoose.model('Portfolio', new mongoose.Schema({
-  resumeText: String,
-  updatedAt: { type: Date, default: Date.now },
-}, { strict: false }));
+import { writeFile } from 'fs/promises';
+import path from 'path';
+import fs from 'fs';
 
 export async function POST(request) {
   try {
@@ -35,34 +23,26 @@ export async function POST(request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    let extractedText = "";
+    // Clean up filename and setup uploads directory path
+    const filename = file.name.replace(/\s+/g, '_');
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
 
-    try {
-      const pdfParseModule = await import('pdf-parse');
-      const parse = pdfParseModule.default || pdfParseModule;
-      const pdfData = await parse(buffer);
-      extractedText = pdfData.text;
-    } catch (parseErr) {
-      console.warn('pdf-parse secondary engine fallback triggered:', parseErr.message);
-      extractedText = buffer.toString('utf8').replace(/[^\x20-\x7E\n]/g, ' ');
+    // Ensure public/uploads directory exists
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    await connectDB();
+    // Write file to public/uploads
+    const filePath = path.join(uploadDir, filename);
+    await writeFile(filePath, buffer);
 
-    let portfolio = await Portfolio.findOne();
-    if (!portfolio) {
-      portfolio = new Portfolio({});
-    }
-
-    portfolio.resumeText = extractedText;
-    portfolio.updatedAt = new Date();
-
-    await portfolio.save();
+    // Return the public URL path so the frontend/database can store it
+    const fileUrl = `/uploads/${filename}`;
 
     return NextResponse.json({ 
       success: true, 
-      message: 'PDF successfully processed and portfolio updated!',
-      extractedTextSnippet: extractedText.slice(0, 200)
+      message: 'PDF file successfully uploaded!',
+      url: fileUrl 
     });
 
   } catch (err) {
