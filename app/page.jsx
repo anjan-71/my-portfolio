@@ -12,13 +12,13 @@ export default async function Home() {
     portfolioData = {
       about: {
         name: "Anjan Boro",
-        title: "Full-Stack Developer & Cloud Enthusiast",
-        summary: "Building and deploying modern, high-performance web applications with real-time database management."
+        title: "Full-Stack Developer",
+        summary: "Building and deploying modern web applications."
       }
     };
   }
 
-  const { about, resumeUrl, socialLinks, skills, education, experience, projects } = portfolioData;
+  const { about, resumeUrl, socialLinks, skills, education, experience, projects, publications, certifications, training } = portfolioData;
 
   const formatUrl = (url) => {
     if (!url) return '';
@@ -69,14 +69,13 @@ export default async function Home() {
     <main className="min-h-screen bg-slate-950 text-slate-100 p-8 sm:p-16">
       <div className="max-w-4xl mx-auto space-y-12">
         
-        {/* Header / About Section */}
+        {/* Header / About */}
         <header className="flex flex-col sm:flex-row justify-between items-start border-b border-slate-800 pb-8 gap-6">
           <div className="space-y-3">
             <h1 className="text-4xl font-bold tracking-tight text-white">{about?.name || "Portfolio"}</h1>
             <p className="text-xl text-indigo-400">{about?.title}</p>
             <p className="text-slate-400 max-w-xl text-sm leading-relaxed">{about?.summary}</p>
             
-            {/* Social Media Icons */}
             {socialLinks && Array.isArray(socialLinks) && socialLinks.length > 0 && (
               <div className="flex flex-wrap gap-2.5 pt-2">
                 {socialLinks.map((social, idx) => (
@@ -103,10 +102,9 @@ export default async function Home() {
               Admin Panel ⚙️
             </Link>
 
-            {/* Resume Download Button */}
             {resumeUrl && (
               <a 
-                href={resumeUrl} 
+                href={formatUrl(resumeUrl)} 
                 target="_blank" 
                 rel="noreferrer" 
                 className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-2 rounded-md font-medium transition inline-flex items-center gap-1.5"
@@ -118,7 +116,7 @@ export default async function Home() {
           </div>
         </header>
 
-        {/* Education Section */}
+        {/* Education */}
         {education && Array.isArray(education) && education.length > 0 && (
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-white">Education</h2>
@@ -130,7 +128,7 @@ export default async function Home() {
                       <h3 className="text-lg font-medium text-white">{edu.degree}</h3>
                       <p className="text-indigo-400 text-sm mt-1">{edu.institution}</p>
                     </div>
-                    <span className="text-xs text-slate-400">{edu.period || edu.tenure}</span>
+                    <span className="text-xs text-slate-400">{edu.period}</span>
                   </div>
                   {edu.description && (
                     <p className="text-slate-300 text-sm leading-relaxed pt-1">{edu.description}</p>
@@ -141,7 +139,7 @@ export default async function Home() {
           </section>
         )}
 
-        {/* Skills Section */}
+        {/* Skills */}
         {skills && Array.isArray(skills) && skills.length > 0 && (
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-white">Skills</h2>
@@ -155,7 +153,7 @@ export default async function Home() {
           </section>
         )}
 
-        {/* Experience Section */}
+        {/* Experience */}
         {experience && Array.isArray(experience) && experience.length > 0 && (
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-white">Experience</h2>
@@ -163,20 +161,12 @@ export default async function Home() {
               {experience.map((exp, idx) => (
                 <div key={idx} className="bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-2">
                   <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-medium text-white">{exp.title || exp.role}</h3>
-                    <span className="text-xs text-slate-400">{exp.tenure || exp.period}</span>
+                    <h3 className="text-lg font-medium text-white">{exp.title}</h3>
+                    <span className="text-xs text-slate-400">{exp.tenure}</span>
                   </div>
                   <p className="text-indigo-400 text-sm">{exp.company}</p>
                   {exp.description && (
-                    Array.isArray(exp.description) ? (
-                      <ul className="list-disc list-inside space-y-1 text-slate-300 text-sm">
-                        {exp.description.map((desc, i) => (
-                          <li key={i}>{desc}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-slate-300 text-sm leading-relaxed">{exp.description}</p>
-                    )
+                    <p className="text-slate-300 text-sm leading-relaxed">{exp.description}</p>
                   )}
                 </div>
               ))}
@@ -184,7 +174,7 @@ export default async function Home() {
           </section>
         )}
 
-        {/* Projects Section */}
+        {/* Projects */}
         {projects && Array.isArray(projects) && projects.length > 0 && (
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-white">Projects</h2>
@@ -193,30 +183,84 @@ export default async function Home() {
                 <div key={idx} className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden flex flex-col justify-between shadow-lg">
                   {proj.image && (
                     <div className="w-full h-44 bg-slate-950 relative overflow-hidden border-b border-slate-800">
-                      <img src={proj.image} alt={proj.name || proj.title} className="w-full h-full object-cover" />
+                      <img src={proj.image} alt={proj.name} className="w-full h-full object-cover" />
                     </div>
                   )}
                   <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
                     <div>
                       <div className="flex justify-between items-start">
-                        <h3 className="text-lg font-medium text-white">{proj.name || proj.title}</h3>
+                        <h3 className="text-lg font-medium text-white">{proj.name}</h3>
                         {proj.link && (
                           <a href={formatUrl(proj.link)} target="_blank" rel="noreferrer" className="text-indigo-400 text-xs underline">Link ↗</a>
                         )}
                       </div>
-                      {proj.tenure && (
-                        <p className="text-xs text-indigo-300 font-mono mt-1">{proj.tenure}</p>
-                      )}
                       <p className="text-slate-400 text-sm mt-2">{proj.description}</p>
                     </div>
-                    <div className="flex flex-wrap gap-1.5 pt-2">
-                      {proj.techStack ? (
+                    {proj.techStack && (
+                      <div className="pt-2">
                         <span className="bg-indigo-950 text-indigo-300 px-2 py-0.5 rounded text-[10px]">
                           {proj.techStack}
                         </span>
-                      ) : null}
-                    </div>
+                      </div>
+                    )}
                   </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Publications */}
+        {publications && Array.isArray(publications) && publications.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-white">Publications</h2>
+            <div className="space-y-4">
+              {publications.map((pub, idx) => (
+                <div key={idx} className="bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-2">
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-medium text-white">{pub.title}</h3>
+                    <span className="text-xs text-slate-400">{pub.date}</span>
+                  </div>
+                  <p className="text-indigo-400 text-sm">{pub.publisher}</p>
+                  {pub.link && (
+                    <a href={formatUrl(pub.link)} target="_blank" rel="noreferrer" className="text-indigo-400 text-xs underline inline-block">Read Publication ↗</a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Certifications */}
+        {certifications && Array.isArray(certifications) && certifications.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-white">Certifications</h2>
+            <div className="space-y-3">
+              {certifications.map((cert, idx) => (
+                <div key={idx} className="bg-slate-900 border border-slate-800 p-4 rounded-lg flex justify-between items-center text-sm">
+                  <div>
+                    <span className="font-semibold text-white">{cert.name}</span>
+                    <p className="text-xs text-indigo-400">{cert.issuer}</p>
+                  </div>
+                  <span className="text-xs text-slate-400 font-mono">{cert.year}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Training */}
+        {training && Array.isArray(training) && training.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-white">Training</h2>
+            <div className="space-y-3">
+              {training.map((item, idx) => (
+                <div key={idx} className="bg-slate-900 border border-slate-800 p-4 rounded-lg flex justify-between items-center text-sm">
+                  <div>
+                    <span className="font-semibold text-white">{item.course}</span>
+                    <p className="text-xs text-indigo-400">{item.institution}</p>
+                  </div>
+                  <span className="text-xs text-slate-400 font-mono">{item.tenure}</span>
                 </div>
               ))}
             </div>

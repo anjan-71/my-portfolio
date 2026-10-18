@@ -1,51 +1,49 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import dbConnect from '../../../lib/mongodb';
 import Portfolio from '../../../models/Portfolio';
+import { cookies } from 'next/headers';
 
-// GET is public so visitors can view your structured portfolio data
 export async function GET() {
   try {
     await dbConnect();
-    const data = await Portfolio.findOne().lean();
-    return NextResponse.json(data || {});
+    const portfolio = await Portfolio.findOne().lean();
+    return NextResponse.json(portfolio || {});
   } catch (err) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
-// POST is protected – requires valid admin session cookie to save form data
 export async function POST(request) {
   const cookieStore = await cookies();
   const session = cookieStore.get('admin_session');
 
   if (!session || session.value !== process.env.JWT_SECRET) {
-    return NextResponse.json({ success: false, error: 'Unauthorized. Please log in.' }, { status: 401 });
+    return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     await dbConnect();
     const body = await request.json();
 
-    const updatedPortfolio = await Portfolio.findOneAndUpdate(
+    const updated = await Portfolio.findOneAndUpdate(
       {},
       {
         about: body.about,
-        skills: body.skills || [],
         resumeUrl: body.resumeUrl,
         socialLinks: body.socialLinks,
+        skills: body.skills,
         education: body.education,
-        experience: body.experience || [],
-        projects: body.projects || [],
-        publications: body.publications || [],
-        certifications: body.certifications || [],
-        training: body.training || [],
+        experience: body.experience,
+        projects: body.projects,
+        publications: body.publications,
+        certifications: body.certifications,
+        training: body.training,
         updatedAt: new Date()
       },
-      { upsert: true, new: true, strict: false }
+      { upsert: true, new: true }
     );
 
-    return NextResponse.json({ success: true, data: updatedPortfolio });
+    return NextResponse.json({ success: true, data: updated });
   } catch (err) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

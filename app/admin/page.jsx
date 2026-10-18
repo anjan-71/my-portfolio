@@ -10,8 +10,8 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingPdf, setUploadingPdf] = useState(false);
+  const [uploadingImageIndex, setUploadingImageIndex] = useState(null);
 
-  // Form State
   const [formData, setFormData] = useState({
     about: { name: '', title: '', summary: '' },
     resumeUrl: '',
@@ -143,27 +143,6 @@ export default function AdminPage() {
     }
   };
 
-  const handlePdfUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadingPdf(true);
-    try {
-      const form = new FormData();
-      form.append('file', file);
-      const res = await fetch('/api/portfolio/upload-pdf', { method: 'POST', body: form });
-      const result = await res.json();
-      if (!res.ok || !result.success) throw new Error(result.error);
-      
-      setFormData(prev => ({ ...prev, resumeUrl: result.url || `/uploads/${file.name}` }));
-      alert('PDF processed and attached successfully!');
-    } catch (err) {
-      alert('PDF upload failed: ' + err.message);
-    } finally {
-      setUploadingPdf(false);
-    }
-  };
-
   if (loading) return <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">Loading...</div>;
 
   if (!isAuthenticated) {
@@ -196,83 +175,53 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* PDF Resume Upload & Link */}
+        {/* RESUME URL */}
         <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-lg font-semibold">Resume PDF & Download Link</h2>
-              <p className="text-sm text-slate-400">Upload your resume PDF for visitors to download</p>
-            </div>
-            <label className="cursor-pointer bg-indigo-600 hover:bg-indigo-500 text-sm font-medium px-5 py-2.5 rounded-xl">
-              {uploadingPdf ? 'Processing...' : 'Upload PDF 📄'}
-              <input type="file" accept="application/pdf" onChange={handlePdfUpload} disabled={uploadingPdf} className="hidden" />
-            </label>
-          </div>
-          <div>
-            <label className="block text-xs text-slate-400 mb-1">Resume Download URL</label>
-            <input 
-              type="text" 
-              value={formData.resumeUrl || ''} 
-              onChange={e => setFormData(prev => ({ ...prev, resumeUrl: e.target.value }))} 
-              placeholder="/uploads/resume.pdf or external link" 
-              className="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-sm" 
-            />
-          </div>
+          <h2 className="text-lg font-semibold">Resume Link / Google Drive URL</h2>
+          <input 
+            type="text" 
+            value={formData.resumeUrl || ''} 
+            onChange={e => setFormData(prev => ({ ...prev, resumeUrl: e.target.value }))} 
+            placeholder="Paste Google Drive or external link here" 
+            className="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-sm" 
+          />
         </div>
 
-        {/* ABOUT / HEADER SECTION */}
+        {/* ABOUT SECTION */}
         <section className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
           <h2 className="text-xl font-semibold text-indigo-400">About / Header Section</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs text-slate-400 mb-1">Your Full Name</label>
-              <input 
-                type="text" 
-                value={formData.about?.name || ''} 
-                onChange={e => updateAboutField('name', e.target.value)} 
-                placeholder="Anjan Boro" 
-                className="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-sm" 
-              />
+              <input type="text" value={formData.about?.name || ''} onChange={e => updateAboutField('name', e.target.value)} placeholder="Anjan Boro" className="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-sm" />
             </div>
             <div>
-              <label className="block text-xs text-slate-400 mb-1">Professional Title / Tagline</label>
-              <input 
-                type="text" 
-                value={formData.about?.title || ''} 
-                onChange={e => updateAboutField('title', e.target.value)} 
-                placeholder="Full-Stack Developer & Cloud Enthusiast" 
-                className="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-sm" 
-              />
+              <label className="block text-xs text-slate-400 mb-1">Professional Title</label>
+              <input type="text" value={formData.about?.title || ''} onChange={e => updateAboutField('title', e.target.value)} placeholder="Full-Stack Developer" className="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-sm" />
             </div>
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">Professional Summary / Bio</label>
-            <textarea 
-              value={formData.about?.summary || ''} 
-              onChange={e => updateAboutField('summary', e.target.value)} 
-              placeholder="Building and deploying modern web applications..." 
-              rows={3} 
-              className="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-sm" 
-            />
+            <label className="block text-xs text-slate-400 mb-1">Professional Summary</label>
+            <textarea value={formData.about?.summary || ''} onChange={e => updateAboutField('summary', e.target.value)} placeholder="Summary..." rows={3} className="w-full bg-slate-950 border border-slate-800 p-3 rounded-lg text-sm" />
           </div>
         </section>
 
-        {/* SOCIAL MEDIA LINKS SECTION */}
+        {/* SOCIAL LINKS */}
         <section className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold text-indigo-400">Social Media & Professional Links</h2>
+            <h2 className="text-xl font-semibold text-indigo-400">Social Media Links</h2>
             <button type="button" onClick={() => addItem('socialLinks', { platform: '', url: '' })} className="text-xs bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg">+ Add Social Link</button>
           </div>
           {formData.socialLinks && formData.socialLinks.map((item, index) => (
             <div key={index} className="bg-slate-950 border border-slate-800 p-4 rounded-xl flex gap-3 items-center relative">
-              <input type="text" placeholder="Platform (e.g., GitHub, LinkedIn)" value={item.platform || ''} onChange={e => updateItemField('socialLinks', index, 'platform', e.target.value)} className="w-1/3 bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
-              <input type="text" placeholder="URL (e.g., github.com/username)" value={item.url || ''} onChange={e => updateItemField('socialLinks', index, 'url', e.target.value)} className="flex-1 bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
-              <button type="button" onClick={() => removeItem('socialLinks', index)} className="text-red-400 hover:text-red-300 text-xs">Remove</button>
+              <input type="text" placeholder="Platform (GitHub, LinkedIn, Instagram, Twitter)" value={item.platform || ''} onChange={e => updateItemField('socialLinks', index, 'platform', e.target.value)} className="w-1/3 bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              <input type="text" placeholder="URL" value={item.url || ''} onChange={e => updateItemField('socialLinks', index, 'url', e.target.value)} className="flex-1 bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              <button type="button" onClick={() => removeItem('socialLinks', index)} className="text-red-400 text-xs">Remove</button>
             </div>
           ))}
         </section>
 
-        {/* EDUCATION SECTION */}
+        {/* EDUCATION */}
         <section className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-indigo-400">Education</h2>
@@ -282,33 +231,33 @@ export default function AdminPage() {
             <div key={index} className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3 relative">
               <button type="button" onClick={() => removeItem('education', index)} className="absolute top-3 right-3 text-red-400 text-xs">Remove</button>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input type="text" placeholder="Degree / Program" value={item.degree || ''} onChange={e => updateItemField('education', index, 'degree', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
-                <input type="text" placeholder="Institution Name" value={item.institution || ''} onChange={e => updateItemField('education', index, 'institution', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+                <input type="text" placeholder="Degree" value={item.degree || ''} onChange={e => updateItemField('education', index, 'degree', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+                <input type="text" placeholder="Institution" value={item.institution || ''} onChange={e => updateItemField('education', index, 'institution', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
               </div>
-              <input type="text" placeholder="Period (e.g., 2021 - 2025)" value={item.period || ''} onChange={e => updateItemField('education', index, 'period', e.target.value)} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
-              <textarea placeholder="Description / Coursework / Honors" value={item.description || ''} onChange={e => updateItemField('education', index, 'description', e.target.value)} rows={2} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              <input type="text" placeholder="Period" value={item.period || ''} onChange={e => updateItemField('education', index, 'period', e.target.value)} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              <textarea placeholder="Description" value={item.description || ''} onChange={e => updateItemField('education', index, 'description', e.target.value)} rows={2} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
             </div>
           ))}
         </section>
 
-        {/* SKILLS SECTION */}
+        {/* SKILLS */}
         <section className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
           <h2 className="text-xl font-semibold text-indigo-400">Skills</h2>
           <div className="flex gap-2">
-            <input type="text" value={skillInput} onChange={e => setSkillInput(e.target.value)} placeholder="Add a skill (e.g., React, Node.js)" className="flex-1 bg-slate-950 border border-slate-800 p-2.5 rounded-lg text-sm" />
+            <input type="text" value={skillInput} onChange={e => setSkillInput(e.target.value)} placeholder="Add a skill" className="flex-1 bg-slate-950 border border-slate-800 p-2.5 rounded-lg text-sm" />
             <button type="button" onClick={addSkill} className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg text-sm font-medium">Add Skill</button>
           </div>
           <div className="flex flex-wrap gap-2 mt-3">
             {formData.skills && formData.skills.map((skill, index) => (
               <span key={index} className="bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-lg text-xs flex items-center gap-2">
                 {skill}
-                <button type="button" onClick={() => removeSkill(index)} className="text-red-400 hover:text-red-300">×</button>
+                <button type="button" onClick={() => removeSkill(index)} className="text-red-400">×</button>
               </span>
             ))}
           </div>
         </section>
 
-        {/* EXPERIENCE SECTION */}
+        {/* EXPERIENCE */}
         <section className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-indigo-400">Experience</h2>
@@ -318,64 +267,91 @@ export default function AdminPage() {
             <div key={index} className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3 relative">
               <button type="button" onClick={() => removeItem('experience', index)} className="absolute top-3 right-3 text-red-400 text-xs">Remove</button>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input type="text" placeholder="Job Title" value={item.title || ''} onChange={e => updateItemField('experience', index, 'title', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
-                <input type="text" placeholder="Company Name" value={item.company || ''} onChange={e => updateItemField('experience', index, 'company', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+                <input type="text" placeholder="Title" value={item.title || ''} onChange={e => updateItemField('experience', index, 'title', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+                <input type="text" placeholder="Company" value={item.company || ''} onChange={e => updateItemField('experience', index, 'company', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
               </div>
-              <input type="text" placeholder="Tenure (e.g., Jan 2023 - Present)" value={item.tenure || ''} onChange={e => updateItemField('experience', index, 'tenure', e.target.value)} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
-              <textarea placeholder="Description & Key Responsibilities" value={item.description || ''} onChange={e => updateItemField('experience', index, 'description', e.target.value)} rows={2} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              <input type="text" placeholder="Tenure" value={item.tenure || ''} onChange={e => updateItemField('experience', index, 'tenure', e.target.value)} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              <textarea placeholder="Description" value={item.description || ''} onChange={e => updateItemField('experience', index, 'description', e.target.value)} rows={2} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
             </div>
           ))}
         </section>
 
-        {/* PROJECTS SECTION */}
+        {/* PROJECTS */}
         <section className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-semibold text-indigo-400">Projects</h2>
-            <button type="button" onClick={() => addItem('projects', { name: '', link: '', description: '', techStack: '', tenure: '', image: '' })} className="text-xs bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg">+ Add Project</button>
+            <button type="button" onClick={() => addItem('projects', { name: '', link: '', description: '', techStack: '', image: '' })} className="text-xs bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg">+ Add Project</button>
           </div>
           {formData.projects && formData.projects.map((item, index) => (
             <div key={index} className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3 relative">
               <button type="button" onClick={() => removeItem('projects', index)} className="absolute top-3 right-3 text-red-400 text-xs">Remove</button>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input type="text" placeholder="Project Name" value={item.name || ''} onChange={e => updateItemField('projects', index, 'name', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
-                <input type="text" placeholder="Live/Repo Link" value={item.link || ''} onChange={e => updateItemField('projects', index, 'link', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+                <input type="text" placeholder="Link" value={item.link || ''} onChange={e => updateItemField('projects', index, 'link', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input type="text" placeholder="Tenure (e.g., Jan 2024 - Feb 2024)" value={item.tenure || ''} onChange={e => updateItemField('projects', index, 'tenure', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
-                <div className="flex gap-2 items-center">
-                  <input type="text" placeholder="Image URL or upload file" value={item.image || ''} onChange={e => updateItemField('projects', index, 'image', e.target.value)} className="flex-1 bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
-                  <label className="cursor-pointer bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2.5 rounded-lg font-medium whitespace-nowrap">
-                    Upload 📁
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      className="hidden" 
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        try {
-                          const form = new FormData();
-                          form.append('file', file);
-                          const res = await fetch('/api/portfolio/upload-image', { method: 'POST', body: form });
-                          const result = await res.json();
-                          if (!res.ok || !result.success) throw new Error(result.error);
-                          updateItemField('projects', index, 'image', result.url);
-                          alert('Image uploaded successfully!');
-                        } catch (err) {
-                          alert('Image upload failed: ' + err.message);
-                        }
-                      }} 
-                    />
-                  </label>
-                </div>
-              </div>
-              <input type="text" placeholder="Tech Stack (e.g., Next.js, Tailwind, MongoDB)" value={item.techStack || ''} onChange={e => updateItemField('projects', index, 'techStack', e.target.value)} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
-              <textarea placeholder="Project Description" value={item.description || ''} onChange={e => updateItemField('projects', index, 'description', e.target.value)} rows={2} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              <input type="text" placeholder="Image URL (Direct link)" value={item.image || ''} onChange={e => updateItemField('projects', index, 'image', e.target.value)} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              <input type="text" placeholder="Tech Stack" value={item.techStack || ''} onChange={e => updateItemField('projects', index, 'techStack', e.target.value)} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              <textarea placeholder="Description" value={item.description || ''} onChange={e => updateItemField('projects', index, 'description', e.target.value)} rows={2} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
             </div>
           ))}
         </section>
 
-        {/* Save Button */}
+        {/* PUBLICATIONS */}
+        <section className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold text-indigo-400">Publications</h2>
+            <button type="button" onClick={() => addItem('publications', { title: '', publisher: '', date: '', link: '' })} className="text-xs bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg">+ Add Publication</button>
+          </div>
+          {formData.publications && formData.publications.map((item, index) => (
+            <div key={index} className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3 relative">
+              <button type="button" onClick={() => removeItem('publications', index)} className="absolute top-3 right-3 text-red-400 text-xs">Remove</button>
+              <input type="text" placeholder="Title" value={item.title || ''} onChange={e => updateItemField('publications', index, 'title', e.target.value)} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input type="text" placeholder="Publisher" value={item.publisher || ''} onChange={e => updateItemField('publications', index, 'publisher', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+                <input type="text" placeholder="Date" value={item.date || ''} onChange={e => updateItemField('publications', index, 'date', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              </div>
+              <input type="text" placeholder="Link" value={item.link || ''} onChange={e => updateItemField('publications', index, 'link', e.target.value)} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+            </div>
+          ))}
+        </section>
+
+        {/* CERTIFICATIONS */}
+        <section className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold text-indigo-400">Certifications</h2>
+            <button type="button" onClick={() => addItem('certifications', { name: '', issuer: '', year: '' })} className="text-xs bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg">+ Add Certification</button>
+          </div>
+          {formData.certifications && formData.certifications.map((item, index) => (
+            <div key={index} className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3 relative">
+              <button type="button" onClick={() => removeItem('certifications', index)} className="absolute top-3 right-3 text-red-400 text-xs">Remove</button>
+              <input type="text" placeholder="Certification Name" value={item.name || ''} onChange={e => updateItemField('certifications', index, 'name', e.target.value)} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input type="text" placeholder="Issuer" value={item.issuer || ''} onChange={e => updateItemField('certifications', index, 'issuer', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+                <input type="text" placeholder="Year" value={item.year || ''} onChange={e => updateItemField('certifications', index, 'year', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {/* TRAINING */}
+        <section className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold text-indigo-400">Training</h2>
+            <button type="button" onClick={() => addItem('training', { course: '', institution: '', tenure: '' })} className="text-xs bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded-lg">+ Add Training</button>
+          </div>
+          {formData.training && formData.training.map((item, index) => (
+            <div key={index} className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3 relative">
+              <button type="button" onClick={() => removeItem('training', index)} className="absolute top-3 right-3 text-red-400 text-xs">Remove</button>
+              <input type="text" placeholder="Course Title" value={item.course || ''} onChange={e => updateItemField('training', index, 'course', e.target.value)} className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input type="text" placeholder="Institution" value={item.institution || ''} onChange={e => updateItemField('training', index, 'institution', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+                <input type="text" placeholder="Tenure" value={item.tenure || ''} onChange={e => updateItemField('training', index, 'tenure', e.target.value)} className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-sm" />
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {/* SAVE BUTTON */}
         <div className="flex justify-end pt-4">
           <button type="button" onClick={handleSave} disabled={saving} className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-950 text-white font-medium px-8 py-3 rounded-xl transition shadow-lg">
             {saving ? 'Saving Changes...' : 'Save All Changes'}
